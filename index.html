@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Just Press Space</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top, #1b1f3b, #000);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: Arial, sans-serif;
+      color: white;
+      overflow: hidden;
+    }
+
+    .container {
+      text-align: center;
+      width: 100%;
+      max-width: 400px;
+      position: relative;
+    }
+
+    .caption {
+      font-size: 24px;
+      margin-bottom: 20px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .caption.show {
+      opacity: 1;
+    }
+
+    .captain {
+      width: 200px;
+      margin: 0 auto;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-15px); }
+      100% { transform: translateY(0px); }
+    }
+
+    .shake {
+      animation: shake 0.4s;
+    }
+
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      50% { transform: translateX(6px); }
+      75% { transform: translateX(-6px); }
+      100% { transform: translateX(0); }
+    }
+
+    button {
+      margin-top: 30px;
+      padding: 14px 28px;
+      font-size: 18px;
+      border: none;
+      border-radius: 30px;
+      background: #7b5cff;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div id="caption" class="caption">JUST PRESS SPACE</div>
+
+    <!-- Replace src with your Captain Spacebar image -->
+    <img 
+      id="captain"
+      class="captain"
+      src="https://via.placeholder.com/200x200.png?text=Captain+Spacebar"
+      alt="Captain Spacebar"
+    />
+
+    <button onclick="triggerPress()">PRESS SPACE</button>
+  </div>
+
+  <script>
+    const captions = [
+      "JUST PRESS SPACE 🚀",
+      "SOMETHING HAPPENED 👀",
+      "KEEP PRESSING ⌨️",
+      "CHAOS DETECTED 🌌",
+      "DON’T STOP NOW",
+      "YOU FELT THAT, RIGHT?"
+    ];
+
+    let locked = false;
+
+    function triggerPress() {
+      if (locked) return;
+      locked = true;
+
+      const captionEl = document.getElementById("caption");
+      const captainEl = document.getElementById("captain");
+
+      // Random caption
+      const text = captions[Math.floor(Math.random() * captions.length)];
+      captionEl.textContent = text;
+      captionEl.classList.add("show");
+
+      // Simple animation effect
+      captainEl.classList.add("shake");
+
+      // Reset
+      setTimeout(() => {
+        captionEl.classList.remove("show");
+        captainEl.classList.remove("shake");
+        locked = false;
+      }, 1200);
+    }
+
+    // Spacebar listener
+    document.addEventListener("keydown", (e) => {
+      if (e.code === "Space") {
+        e.preventDefault();
+        triggerPress();
+      }
+    });
+  </script>
+
+</body>
+</html>
