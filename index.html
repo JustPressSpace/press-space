@@ -1,192 +1,200 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Just Press Space</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Floaty Astronaut</title>
+<style>
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: radial-gradient(circle at center, #050816 0%, #02030a 100%);
+    overflow: hidden;
+    touch-action: manipulation;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #f8fafc;
+    user-select: none;
+  }
 
-  <style>
-    body {
-      margin: 0;
-      background: radial-gradient(circle at top, #1b1f3b, #000);
-      height: 100vh;
-      font-family: Arial, sans-serif;
-      color: white;
-      overflow: hidden;
-    }
+  #wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
 
-    .counter {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      font-size: 16px;
-      opacity: 0.8;
-    }
+  /* Character wrapper floats forever */
+  #character-wrapper {
+    position: absolute;
+    width: 160px;
+    height: 160px;
+    animation: float 3s ease-in-out infinite;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
 
-    .caption {
-      position: absolute;
-      top: 60px;
-      width: 100%;
-      text-align: center;
-      font-size: 26px;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
+  /* Astronaut icon */
+  #character {
+    width: 100%;
+    height: 100%;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    image-rendering: auto;
+  }
 
-    .caption.show {
-      opacity: 1;
-    }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-18px); }
+  }
 
-    .captain {
-      position: absolute;
-      width: 160px;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      transition: transform 0.6s ease;
-      pointer-events: none;
-    }
+  /* Burst movement on press (applied to wrapper) */
+  .burst {
+    animation: burst 260ms cubic-bezier(0.33, 1.4, 0.38, 0.92);
+  }
 
-    .flash {
-      animation: flash 0.3s;
-    }
+  @keyframes burst {
+    0%   { transform: translateY(0) scale(1); filter: brightness(1); }
+    40%  { transform: translateY(-55px) scale(1.06); filter: brightness(1.35); }
+    100% { transform: translateY(0) scale(1); filter: brightness(1); }
+  }
 
-    @keyframes flash {
-      0% { background: rgba(255,255,255,0.1); }
-      100% { background: transparent; }
-    }
+  #counter {
+    position: absolute;
+    top: 1.1rem;
+    width: 100%;
+    text-align: center;
+    font-size: 1.2rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.9;
+  }
 
-    .particle {
-      position: absolute;
-      font-size: 20px;
-      animation: particle 1s forwards;
-      pointer-events: none;
-    }
+  #caption {
+    position: absolute;
+    bottom: 1.5rem;
+    width: 100%;
+    text-align: center;
+    font-size: 0.95rem;
+    opacity: 0.8;
+  }
 
-    @keyframes particle {
-      0% {
-        opacity: 1;
-        transform: translate(0,0) scale(1);
-      }
-      100% {
-        opacity: 0;
-        transform: translate(var(--x), var(--y)) scale(0.5);
-      }
-    }
+  #caption small {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.8rem;
+    opacity: 0.75;
+  }
 
-    button {
-      position: absolute;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 14px 28px;
-      font-size: 18px;
-      border: none;
-      border-radius: 30px;
-      background: #7b5cff;
-      color: white;
-      cursor: pointer;
-    }
+  .particle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: #ffcb77;
+    border-radius: 50%;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    animation: particle-burst 480ms ease-out forwards;
+  }
 
-    button:active {
-      transform: translateX(-50%) scale(0.95);
-    }
-  </style>
+  @keyframes particle-burst {
+    0%   { opacity: 1; transform: translate(0,0) scale(1); }
+    100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.25); }
+  }
+
+  /* Subtle starfield backdrop */
+  .star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: #e5e7eb;
+    border-radius: 50%;
+    opacity: 0.4;
+    animation: twinkle 4s ease-in-out infinite;
+  }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.2; transform: scale(1); }
+    50%      { opacity: 0.9; transform: scale(1.6); }
+  }
+</style>
 </head>
 <body>
+  <div id="wrapper">
+    <div id="character-wrapper">
+      <div id="character"></div>
+    </div>
 
-  <div class="counter">
-    Presses: <span id="count">0</span>
+    <div id="counter">Boosts: 0</div>
+    <div id="caption">
+      Tap anywhere or press space to boost the astronaut!
+      <small>Haptics on supported devices.</small>
+    </div>
   </div>
 
-  <div id="caption" class="caption">JUST PRESS SPACE</div>
+<script>
+  const wrapper = document.getElementById('wrapper');
+  const characterWrapper = document.getElementById('character-wrapper');
+  const character = document.getElementById('character');
+  const counter = document.getElementById('counter');
 
-  <img
-    id="captain"
-    class="captain"
-    src="https://via.placeholder.com/160x160.png?text=Captain+Spacebar"
-    alt="Captain Spacebar"
-  />
+  // Use your astronaut image via data URL
+  character.style.backgroundImage =
+    "url('data:image/jpeg;base64,YOUR_BASE64_JPEG_HERE')";
 
-  <button onclick="triggerPress()">PRESS SPACE</button>
+  let presses = 0;
 
-  <script>
-    const captions = [
-      "JUST PRESS SPACE 🚀",
-      "SOMETHING HAPPENED 👀",
-      "CHAOS MODE ACTIVATED",
-      "THE CHART FELT THAT 📈",
-      "KEEP PRESSING ⌨️",
-      "MAINFRAME GLITCHING",
-      "SPACEBAR ENERGY DETECTED"
-    ];
+  function triggerBurst(x, y) {
+    presses++;
+    counter.textContent = `Boosts: ${presses}`;
 
-    const emojis = ["🚀", "🌕", "⌨️", "🔥", "💥"];
+    // Fast visual burst
+    characterWrapper.classList.remove('burst');
+    void characterWrapper.offsetWidth; // restart animation
+    characterWrapper.classList.add('burst');
 
-    let count = 0;
-    let locked = false;
-
-    function triggerPress() {
-      if (locked) return;
-      locked = true;
-
-      count++;
-      document.getElementById("count").textContent = count;
-
-      const captionEl = document.getElementById("caption");
-      const captain = document.getElementById("captain");
-
-      // Random caption
-      captionEl.textContent = captions[Math.floor(Math.random() * captions.length)];
-      captionEl.classList.add("show");
-
-      // Random bounce position
-      const x = Math.random() * (window.innerWidth - 160);
-      const y = Math.random() * (window.innerHeight - 200);
-      const rotation = Math.random() * 360;
-
-      captain.style.transform = `translate(${x}px, ${y}px) rotate(${rotation}deg) scale(1.1)`;
-
-      // Screen flash
-      document.body.classList.add("flash");
-
-      // Particles
-      for (let i = 0; i < 6; i++) {
-        spawnParticle(captain.offsetLeft + 80, captain.offsetTop + 80);
-      }
-
-      setTimeout(() => {
-        captionEl.classList.remove("show");
-        document.body.classList.remove("flash");
-        locked = false;
-      }, 900);
+    // Haptics
+    if (navigator.vibrate) {
+      navigator.vibrate(30);
     }
 
-    function spawnParticle(x, y) {
-      const p = document.createElement("div");
-      p.className = "particle";
-      p.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    // Particles around astronaut
+    spawnParticles();
+  }
 
-      const dx = (Math.random() - 0.5) * 200 + "px";
-      const dy = (Math.random() - 0.5) * 200 + "px";
-      p.style.setProperty("--x", dx);
-      p.style.setProperty("--y", dy);
+  function spawnParticles() {
+    const rect = characterWrapper.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
 
-      p.style.left = x + "px";
-      p.style.top = y + "px";
+    const count = 14;
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
 
-      document.body.appendChild(p);
+      const angle = Math.random() * Math.PI * 2;
+      const distance = 70 + Math.random() * 45;
 
-      setTimeout(() => p.remove(), 1000);
+      p.style.left = centerX + 'px';
+      p.style.top = centerY + 'px';
+      p.style.setProperty('--dx', Math.cos(angle) * distance + 'px');
+      p.style.setProperty('--dy', Math.sin(angle) * distance + 'px');
+
+      wrapper.appendChild(p);
+      setTimeout(() => p.remove(), 480);
     }
+  }
 
-    document.addEventListener("keydown", (e) => {
-      if (e.code === "Space") {
-        e.preventDefault();
-        triggerPress();
-      }
-    });
-  </script>
-
-</body>
-</html>
+  // Simple starfield
+  (function createStars() {
+    const starCount = 45;
+    for (let i = 0; i < starCount; i++) {
+      const s = document.createElement('div');
+      s.className = 'star';
+      s.style.left = Math.random() * 100 + 'vw';
+      s.style.top = Math.random() * 100 + 'vh';
+      s.style.animationDelay = (Math.ra
