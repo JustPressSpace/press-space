@@ -10,24 +10,25 @@
       margin: 0;
       background: radial-gradient(circle at top, #1b1f3b, #000);
       height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
       font-family: Arial, sans-serif;
       color: white;
       overflow: hidden;
     }
 
-    .container {
-      text-align: center;
-      width: 100%;
-      max-width: 400px;
-      position: relative;
+    .counter {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 16px;
+      opacity: 0.8;
     }
 
     .caption {
-      font-size: 24px;
-      margin-bottom: 20px;
+      position: absolute;
+      top: 60px;
+      width: 100%;
+      text-align: center;
+      font-size: 26px;
       opacity: 0;
       transition: opacity 0.3s ease;
     }
@@ -37,31 +38,47 @@
     }
 
     .captain {
-      width: 200px;
-      margin: 0 auto;
-      animation: float 3s ease-in-out infinite;
+      position: absolute;
+      width: 160px;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      transition: transform 0.6s ease;
+      pointer-events: none;
     }
 
-    @keyframes float {
-      0% { transform: translateY(0px); }
-      50% { transform: translateY(-15px); }
-      100% { transform: translateY(0px); }
+    .flash {
+      animation: flash 0.3s;
     }
 
-    .shake {
-      animation: shake 0.4s;
+    @keyframes flash {
+      0% { background: rgba(255,255,255,0.1); }
+      100% { background: transparent; }
     }
 
-    @keyframes shake {
-      0% { transform: translateX(0); }
-      25% { transform: translateX(-6px); }
-      50% { transform: translateX(6px); }
-      75% { transform: translateX(-6px); }
-      100% { transform: translateX(0); }
+    .particle {
+      position: absolute;
+      font-size: 20px;
+      animation: particle 1s forwards;
+      pointer-events: none;
+    }
+
+    @keyframes particle {
+      0% {
+        opacity: 1;
+        transform: translate(0,0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(var(--x), var(--y)) scale(0.5);
+      }
     }
 
     button {
-      margin-top: 30px;
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
       padding: 14px 28px;
       font-size: 18px;
       border: none;
@@ -72,62 +89,97 @@
     }
 
     button:active {
-      transform: scale(0.95);
+      transform: translateX(-50%) scale(0.95);
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <div id="caption" class="caption">JUST PRESS SPACE</div>
-
-    <!-- Replace src with your Captain Spacebar image -->
-    <img 
-      id="captain"
-      class="captain"
-      src="https://via.placeholder.com/200x200.png?text=Captain+Spacebar"
-      alt="Captain Spacebar"
-    />
-
-    <button onclick="triggerPress()">PRESS SPACE</button>
+  <div class="counter">
+    Presses: <span id="count">0</span>
   </div>
+
+  <div id="caption" class="caption">JUST PRESS SPACE</div>
+
+  <img
+    id="captain"
+    class="captain"
+    src="https://via.placeholder.com/160x160.png?text=Captain+Spacebar"
+    alt="Captain Spacebar"
+  />
+
+  <button onclick="triggerPress()">PRESS SPACE</button>
 
   <script>
     const captions = [
       "JUST PRESS SPACE 🚀",
       "SOMETHING HAPPENED 👀",
+      "CHAOS MODE ACTIVATED",
+      "THE CHART FELT THAT 📈",
       "KEEP PRESSING ⌨️",
-      "CHAOS DETECTED 🌌",
-      "DON’T STOP NOW",
-      "YOU FELT THAT, RIGHT?"
+      "MAINFRAME GLITCHING",
+      "SPACEBAR ENERGY DETECTED"
     ];
 
+    const emojis = ["🚀", "🌕", "⌨️", "🔥", "💥"];
+
+    let count = 0;
     let locked = false;
 
     function triggerPress() {
       if (locked) return;
       locked = true;
 
+      count++;
+      document.getElementById("count").textContent = count;
+
       const captionEl = document.getElementById("caption");
-      const captainEl = document.getElementById("captain");
+      const captain = document.getElementById("captain");
 
       // Random caption
-      const text = captions[Math.floor(Math.random() * captions.length)];
-      captionEl.textContent = text;
+      captionEl.textContent = captions[Math.floor(Math.random() * captions.length)];
       captionEl.classList.add("show");
 
-      // Simple animation effect
-      captainEl.classList.add("shake");
+      // Random bounce position
+      const x = Math.random() * (window.innerWidth - 160);
+      const y = Math.random() * (window.innerHeight - 200);
+      const rotation = Math.random() * 360;
 
-      // Reset
+      captain.style.transform = `translate(${x}px, ${y}px) rotate(${rotation}deg) scale(1.1)`;
+
+      // Screen flash
+      document.body.classList.add("flash");
+
+      // Particles
+      for (let i = 0; i < 6; i++) {
+        spawnParticle(captain.offsetLeft + 80, captain.offsetTop + 80);
+      }
+
       setTimeout(() => {
         captionEl.classList.remove("show");
-        captainEl.classList.remove("shake");
+        document.body.classList.remove("flash");
         locked = false;
-      }, 1200);
+      }, 900);
     }
 
-    // Spacebar listener
+    function spawnParticle(x, y) {
+      const p = document.createElement("div");
+      p.className = "particle";
+      p.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+
+      const dx = (Math.random() - 0.5) * 200 + "px";
+      const dy = (Math.random() - 0.5) * 200 + "px";
+      p.style.setProperty("--x", dx);
+      p.style.setProperty("--y", dy);
+
+      p.style.left = x + "px";
+      p.style.top = y + "px";
+
+      document.body.appendChild(p);
+
+      setTimeout(() => p.remove(), 1000);
+    }
+
     document.addEventListener("keydown", (e) => {
       if (e.code === "Space") {
         e.preventDefault();
